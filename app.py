@@ -58,7 +58,6 @@ def login():
     password = request.form['password']
     login_user = user.find_one({'username': username})
     if login_user:
-        # if bcrypt.checkpw(password.encode('utf-8'), login_user['password']):
         if bcrypt.hashpw(password.encode('utf-8'), login_user['password']) == login_user['password']:
             session['username'] = username
     return redirect(url_for('index'))
