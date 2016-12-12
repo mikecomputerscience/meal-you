@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Meal You{% endblock %}
+
+
+
+{% block page_content %}
+  <div class="row">
+    <div class="col-xs-10 col-xs-offset-1 col-sm-8 col-sm-offset-2 col-md-8 col-md-offset-2">
+      <div class="page-header">
+        <h1>{{ session['username'] }}, this is the order detail:</h1>
+        <h2>
+          <a href="{{ url_for('logout') }}">Logout</a>
+        </h2>
+        <h2>
+          <a href="{{ url_for('index') }}">Meals home</a>
+        </h2>
+        <hr>
+        <div>
+          Order detail for orderid {{ order['orderid'] }}
+          <ul>
+            {% for store in order['meal'] %}
+              <li>{{ store }}
+                <ul>
+                  {% for meal in order['meal'][store] %}
+                    <li>
+                      <a class="meal-link"
+                         data-store="{{ store }}"
+                         data-title="{{ meal }}"
+                         data-name="{{ order['meal'][store][meal]['mealname'] }}"
+                         data-price="{{ order['meal'][store][meal]['price'] }}"
+                         data-quantity="{{ order['meal'][store][meal]['quantity'] }}"
+                         href="{{ url_for('get_the_meal_to_buy', storetitle=store, mealtitle=meal) }}">
+                        Title: {{ meal }},
+                        Name: {{ order['meal'][store][meal]['mealname'] }},
+                        Price: {{ order['meal'][store][meal]['price'] }},
+                        Quantity:{{ order['meal'][store][meal]['quantity'] }},
+                        Subtotal: $<span class="meal-subtotal"></span>
+                      </a>
+                    </li>
+                  {% endfor %}
+                </ul>
+                Subtotal for {{ store }} is $<span class="store-subtotal"></span>
+              </li>
+            {% endfor %}
+          </ul>
+          Subtotal is $<span id="subtotal"></span><br>
+          Tax(9.5%) is $<span id="tax"></span><br>
+          Total is $<span id="total"></span><br>
+        </div>
+        <hr>
+        <div>
+          {#          <a id="buy" class="btn btn-primary" href="{{ url_for('place_order') }}">Buy</a>#}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var order = {};
+
+    $.each($('.meal-subtotal'), function() {
+      var theLink = $(this).parent().closest('a');
+      var price = Number(theLink.attr('data-price'));
+      var quantity = Number(theLink.attr('data-quantity'));
+      var subtotal = (price * quantity).toFixed(2);
+      $(this).html(subtotal);
+    });
+
+    $.each($('.store-subtotal'), function() {
+      var storeSubtotal = 0;
+      var spans = $(this).siblings('ul').find('span');
+      for (var i = 0; i < spans.length; i++) {
+        storeSubtotal += Number($(spans[i]).text());
+      }
+      $(this).html(storeSubtotal.toFixed(2));
+    });
+
+    $.each($('#subtotal'), function() {
+      var subtotal = 0;
+      var storeSpans = $('.store-subtotal');
+      for (var i = 0; i < storeSpans.length; i++) {
+        subtotal += Number($(storeSpans[i]).text());
+      }
+      $(this).html(subtotal.toFixed(2));
+    });
+
+    var theSubtotal = Number($('#subtotal').text());
+    $('#tax').html((theSubtotal * 0.095).toFixed(2));
+    var theTax = Number($('#tax').text());
+    var theTotal = theSubtotal + theTax;
+    $('#total').html(theTotal.toFixed(2));
+  </script>
+
+{% endblock %}
+
+
+

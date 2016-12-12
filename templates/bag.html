@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Meal You{% endblock %}
+
+
+
+{% block page_content %}
+  <div class="row">
+    <div class="col-xs-10 col-xs-offset-1 col-sm-8 col-sm-offset-2 col-md-8 col-md-offset-2">
+      <div class="page-header">
+        <h1>{{ session['username'] }}, this is your bag:</h1>
+        <h2>
+          <a href="{{ url_for('logout') }}">Logout</a>
+        </h2>
+        <h2>
+          <a href="{{ url_for('index') }}">Meals home</a>
+        </h2>
+        <hr>
+        <div>
+          Meals in bag:
+          <ul>
+            {% for store in bag %}
+              <li>{{ store }}
+                <ul>
+                  {% for meal in bag[store] %}
+                    <li>
+                      <a class="meal-link"
+                         data-store="{{ store }}"
+                         data-title="{{ meal }}"
+                         data-name="{{ bag[store][meal]['mealname'] }}"
+                         data-price="{{ bag[store][meal]['price'] }}"
+                         data-quantity="{{ bag[store][meal]['quantity'] }}"
+                         href="{{ url_for('get_the_meal_to_buy', storetitle=store, mealtitle=meal) }}">
+                        Title: {{ meal }},
+                        Name: {{ bag[store][meal]['mealname'] }},
+                        Price: {{ bag[store][meal]['price'] }},
+                        Quantity:{{ bag[store][meal]['quantity'] }},
+                        Subtotal: $<span class="meal-subtotal"></span>
+                      </a>
+                    </li>
+                  {% endfor %}
+                </ul>
+                Subtotal for {{ store }} is $<span class="store-subtotal"></span>
+              </li>
+            {% endfor %}
+          </ul>
+          Subtotal is $<span id="subtotal"></span><br>
+          Tax(9.5%) is $<span id="tax"></span><br>
+          Total is $<span id="total"></span><br>
+        </div>
+        <hr>
+        <div>
+          <a id="buy" class="btn btn-primary" href="{{ url_for('place_order') }}">Buy</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var order = {};
+
+    $.each($('.meal-subtotal'), function() {
+      var theLink = $(this).parent().closest('a');
+      var price = Number(theLink.attr('data-price'));
+      var quantity = Number(theLink.attr('data-quantity'));
+      var subtotal = (price * quantity).toFixed(2);
+      $(this).html(subtotal);
+    });
+
+    $.each($('.store-subtotal'), function() {
+      var storeSubtotal = 0;
+      var spans = $(this).siblings('ul').find('span');
+      for (var i = 0; i < spans.length; i++) {
+        storeSubtotal += Number($(spans[i]).text());
+      }
+      $(this).html(storeSubtotal.toFixed(2));
+    });
+
+    $.each($('#subtotal'), function() {
+      var subtotal = 0;
+      var storeSpans = $('.store-subtotal');
+      for (var i = 0; i < storeSpans.length; i++) {
+        subtotal += Number($(storeSpans[i]).text());
+      }
+      $(this).html(subtotal.toFixed(2));
+    });
+
+    var theSubtotal = Number($('#subtotal').text());
+    $('#tax').html((theSubtotal * 0.095).toFixed(2));
+    var theTax = Number($('#tax').text());
+    var theTotal = theSubtotal + theTax;
+    $('#total').html(theTotal.toFixed(2));
+
+    function createOrder(store, title, name, price, quantity) {
+      if (order[store]) {
+      } else {
+        order[store] = {};
+      }
+      order[store][title] = {
+        'mealname': name,
+        'price': price,
+        'quantity': quantity
+      };
+    }
+
+    $('#buy').click(function(event) {
+      event.preventDefault();
+
+      $.each($('.meal-link'), function() {
+        var theStore = this.getAttribute('data-store');
+        var theTitle = this.getAttribute('data-title');
+        var theName = this.getAttribute('data-name');
+        var thePrice = this.getAttribute('data-price');
+        var theQuantity = this.getAttribute('data-quantity');
+        createOrder(theStore, theTitle, theName, thePrice, theQuantity);
+      });
+
+      $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        url: "/place_order",
+        data: JSON.stringify(order),
+        dataType: "json",
+        success: function(data) {
+          console.log('Order placed successfully!');
+          console.log(data.success);
+          window.location.replace("{{url_for('index')}}");
+        },
+        error: function(error) {
+          console.log('Failed to place order, please try later.');
+          console.log(error);
+          window.location.replace("{{url_for('index')}}");
+        }
+      });
+    });
+  </script>
+
+{% endblock %}
+
+
+

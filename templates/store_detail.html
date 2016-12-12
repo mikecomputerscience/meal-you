@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Meal You{% endblock %}
+
+
+
+{% block page_content %}
+  <div class="row">
+    <div class="col-xs-10 col-xs-offset-1 col-sm-8 col-sm-offset-2 col-md-8 col-md-offset-2">
+      <div class="page-header">
+        <h1>Restaurant owner, welcome to Meal You!</h1>
+        <h2>
+          <a href="{{ url_for('logout') }}">Logout</a>
+        </h2>
+        <h2>
+          <a href="{{ url_for('index') }}">Meals home</a>
+        </h2>
+        <hr>
+        {{ storetitle }}
+        <hr>
+        <div>
+          Existing Meals:
+          <ul>
+            {% for meal in meals %}
+              <li><a
+                  href="
+                      {{ url_for('get_the_meal_to_buy', storetitle=storetitle, mealtitle=meal) }}"> {{ meal }} {{ meals[meal]['name'] }} {{ meals[meal]['price'] }} </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <hr>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+

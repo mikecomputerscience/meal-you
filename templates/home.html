@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Meal You{% endblock %}
+
+
+
+{% block page_content %}
+  <div class="row">
+    <div class="col-xs-10 col-xs-offset-1 col-sm-8 col-sm-offset-2 col-md-8 col-md-offset-2">
+      <div class="page-header">
+        <h1>Welcome to Meal You!</h1>
+        <h2>
+          <a href="{{ url_for('logout') }}">Logout</a>
+        </h2>
+        <hr>
+        <h2>
+          <a href="{{ url_for('go_to_bag') }}">Bag</a>
+        </h2>
+        <p>The local date and time is {{ moment(current_time).format('LLL') }}.</p>
+        <p>That was {{ moment(current_time).fromNow(refresh=True) }}</p>
+        <h1>Hello, {% if session %}{{ session['username'] }}{% else %}Stranger{% endif %}</h1>
+      </div>
+
+
+      <hr>
+
+      <div>
+        Available restaurants:
+        <ul>
+          {% for store in stores %}
+            <li><a href="{{ url_for('get_the_store', storetitle=store) }}"> {{ store }} </a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <hr>
+      <div>
+        Order History:
+        <ul>
+          {% for the_order in order %}
+            <li>
+              <a href="{{ url_for('order_detail_for_customer', orderid=the_order['orderid']) }}">{{ the_order['orderid'] }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+        <hr>
+        <br>
+      </div>
+
+    </div>
+  </div>
+{% endblock %}
+
+
+
+
+
