@@ -15,6 +15,8 @@ from flask_moment import Moment
 
 app = Flask(__name__)
 
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'this_should_be_configured')
+
 bootstrap = Bootstrap(app)
 moment = Moment(app)
 
@@ -331,6 +333,6 @@ def order_detail_for_rest(orderid):
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5002))
-    app.secret_key = 'mysecret'
-    app.run(host='127.0.0.1', port=port, debug=True)
+    app.debug = True
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
